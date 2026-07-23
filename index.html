@@ -32,6 +32,11 @@
   .item:hover { background:#f0f7f7; }
   .item.active { background:#e5f4f3; border-left-color:#12a5a0; }
   .item .time { font-size:11px; color:#12a5a0; font-weight:700; }
+  .item .prbadge { display:inline-block; font-size:10.5px; font-weight:700; padding:1px 8px; border-radius:10px; }
+  .prbadge.must { background:#ffe3d6; color:#d84315; }
+  .prbadge.rec  { background:#e5f4f3; color:#0e7c7b; }
+  .prbadge.opt  { background:#eef1f3; color:#8a97a0; }
+  .prbadge.move { background:#ede7f6; color:#7e57c2; }
   .item .num { display:inline-block; width:17px; height:17px; line-height:17px; text-align:center; background:#12a5a0; color:#fff; border-radius:50%; font-size:10.5px; font-weight:700; margin-right:5px; vertical-align:1px; }
   .item .name { font-size:14.5px; font-weight:600; color:#2b3a42; margin:2px 0; }
   .item .desc { font-size:12px; color:#66757f; line-height:1.65; }
@@ -76,7 +81,7 @@
   <div class="sidebar">
     <div class="header">
       <h1>🇻🇳 越南之旅 · 10天</h1>
-      <div class="sub">河内 1晚 → 岘港 5天(摩托车)→ 胡志明 3天 · 两人出行</div>
+      <div class="sub">河内 1晚 → 岘港 5天(摩托车)→ 胡志明 3天 · 两人出行<br><span style="opacity:.92">🔀 每天按「值得去」优先级排序,自己挑想去的(不固定时长);交通/航班在列表最下方</span></div>
       <div class="flight">✈ 7/27 MF8594 杭州T3 13:50 → 厦门T3 15:20(厦门过夜)<br>✈ 7/28 MF859 厦门T3 13:15 → 河内T2 14:40<br>🎫 待订(都订傍晚班):7/29 河内→岘港 · 8/3 岘港→胡志明 · 8/6 胡志明→杭州</div>
     </div>
     <div class="tabs" id="tabs"></div>
@@ -84,7 +89,7 @@
   </div>
   <div class="map-pane">
     <div class="map-label" id="mapLabel">越南全境总览</div>
-    <div class="route-btn" id="routeBtn" style="display:none">🗺 显示全天地点</div>
+    <div class="route-btn" id="routeBtn" style="display:none">🗺 显示当天全部地点</div>
     <div id="map"></div>
   </div>
 </div>
@@ -94,113 +99,113 @@
 const DAYS = [
 { tab:"7/27 出发", title:"Day 0 · 7月27日 周一 · 杭州 → 厦门(中转过夜)", note:"MF8594 下午13:50起飞,提前2小时到杭州萧山T3。厦门过夜,晚上可出去逛逛。",
   items:[
-    {t:"13:50",n:"杭州萧山 T3 ✈ 厦门 T3",d:"MF8594,15:20抵达厦门T3。入住机场附近或市区酒店。",c:[24.5440,118.1277],f:[30.2295,120.4347],q:"Xiamen Gaoqi International Airport Terminal 3",tags:["flight"]},
-    {t:"18:00",n:"中山路步行街 + 沙坡尾",d:"厦门老城夜景,沙茶面、海蛎煎解决晚餐。",c:[24.4565,118.0783],q:"Zhongshan Road Pedestrian Street Xiamen",tags:["food"]},
+    {pr:"rec",n:"中山路步行街 + 沙坡尾",d:"厦门老城夜景,沙茶面、海蛎煎解决晚餐。",c:[24.4565,118.0783],q:"Zhongshan Road Pedestrian Street Xiamen",tags:["food"]},
+    {pr:"move",n:"杭州萧山 T3 ✈ 厦门 T3",d:"MF8594,15:20抵达厦门T3。入住机场附近或市区酒店。",c:[24.5440,118.1277],f:[30.2295,120.4347],q:"Xiamen Gaoqi International Airport Terminal 3",tags:["flight"]},
   ]},
 { tab:"7/28 河内", title:"Day 1 · 7月28日 周二 · 抵达河内(半天)", note:"MF859 13:15厦门起飞,14:40抵河内内排机场T2。入境后机场买SIM卡/取现金,Grab打车约45分钟到老城区。",
   items:[
-    {t:"14:40",n:"厦门 T3 ✈ 河内内排 T2",d:"MF859 13:15起飞。入境走eVisa通道(带打印件)。机场办Viettel电话卡,ATM取越南盾。",c:[21.2140,105.8030],f:[24.5440,118.1277],q:"Noi Bai International Airport Terminal 2",tags:["flight"]},
-    {t:"16:00",n:"入住老城区酒店",d:"建议住还剑湖/三十六行街一带,步行覆盖所有景点。",c:[21.0340,105.8510],q:"Hanoi Old Quarter",tags:[]},
-    {t:"17:30",n:"还剑湖 + 玉山祠",d:"环湖散步,看龟塔日落,过红色栖旭桥进玉山祠。",c:[21.0287,105.8524],q:"Hoan Kiem Lake Hanoi",tags:["nature"]},
-    {t:"19:00",n:"晚餐:Bun Cha Huong Lien",d:"「奥巴马套餐」烤肉米线,人均约10万越南盾。",c:[21.0166,105.8525],q:"Bun Cha Huong Lien Hanoi",tags:["food"]},
-    {t:"20:30",n:"火车街咖啡",d:"2026年需从持营业执照的咖啡馆进入(点杯饮料即可),火车经过时听店家指挥。晚间通常有班次,到店问当日时刻。",c:[21.0330,105.8419],q:"Hanoi Train Street",tags:["food","tip"]},
-    {t:"21:30",n:"谢现啤酒街",d:"老城区夜生活,小板凳扎啤,感受河内的夜。",c:[21.0350,105.8523],q:"Ta Hien Beer Street Hanoi",tags:["food"]},
+    {pr:"must",n:"还剑湖 + 玉山祠",d:"环湖散步,看龟塔日落,过红色栖旭桥进玉山祠。",c:[21.0287,105.8524],q:"Hoan Kiem Lake Hanoi",tags:["nature"]},
+    {pr:"must",n:"火车街咖啡",d:"2026年需从持营业执照的咖啡馆进入(点杯饮料即可),火车经过时听店家指挥。晚间通常有班次,到店问当日时刻。",c:[21.0330,105.8419],q:"Hanoi Train Street",tags:["food","tip"]},
+    {pr:"rec",n:"晚餐:Bun Cha Huong Lien",d:"「奥巴马套餐」烤肉米线,人均约10万越南盾。",c:[21.0166,105.8525],q:"Bun Cha Huong Lien Hanoi",tags:["food"]},
+    {pr:"rec",n:"谢现啤酒街",d:"老城区夜生活,小板凳扎啤,感受河内的夜。",c:[21.0350,105.8523],q:"Ta Hien Beer Street Hanoi",tags:["food"]},
+    {pr:"move",n:"厦门 T3 ✈ 河内内排 T2",d:"MF859 13:15起飞。入境走eVisa通道(带打印件)。机场办Viettel电话卡,ATM取越南盾。",c:[21.2140,105.8030],f:[24.5440,118.1277],q:"Noi Bai International Airport Terminal 2",tags:["flight"]},
+    {pr:"move",n:"入住老城区酒店",d:"建议住还剑湖/三十六行街一带,步行覆盖所有景点。",c:[21.0340,105.8510],q:"Hanoi Old Quarter",tags:[]},
   ]},
 { tab:"7/29 河内→岘港", title:"Day 2 · 7月29日 周三 · 河内一日 + 傍晚飞岘港", note:"河内只留这一整天:上午巴亭区(昇龙皇城→独柱寺→文庙),下午老城区(火炉监狱→大教堂→采购),傍晚退房飞岘港,睡前落地岘港。",
   items:[
-    {t:"07:30",n:"早餐:Pho Gia Truyen 牛肉粉",d:"49 Bat Dan街百年老店,河内最有名的Pho之一,排队快。",c:[21.0339,105.8464],q:"Pho Gia Truyen 49 Bat Dan Hanoi",tags:["food"]},
-    {t:"08:30",n:"昇龙皇城(世界遗产)",d:"李陈黎三朝皇城遗址,端门、敬天殿台基,地下还有越战D67作战指挥部。途经巴亭广场顺看。门票约3万盾。",c:[21.0353,105.8400],q:"Imperial Citadel of Thang Long Hanoi",tags:[]},
-    {t:"10:00",n:"独柱寺",d:"巴亭广场旁,10分钟即可,顺路一看。",c:[21.0358,105.8337],q:"One Pillar Pagoda Hanoi",tags:[]},
-    {t:"10:45",n:"文庙(国子监)",d:"越南第一所大学,汉字牌匾满满中华文化痕迹。门票约7万盾。",c:[21.0293,105.8356],q:"Temple of Literature Hanoi",tags:[]},
-    {t:"12:00",n:"午餐:Banh Mi 25",d:"老城区人气法棍店,推荐烤肉+pate口味。",c:[21.0355,105.8478],q:"Banh Mi 25 Hanoi",tags:["food"]},
-    {t:"13:00",n:"火炉监狱博物馆",d:"法殖民时期监狱+越战美军战俘营(参议员麦凯恩被关处),断头台、地牢实景,内容硬核但震撼。门票约5万盾。",c:[21.0256,105.8467],q:"Hoa Lo Prison Hanoi",tags:[]},
-    {t:"14:30",n:"河内大教堂 + Giang 蛋咖啡",d:"圣若瑟大教堂周边买咖啡豆、滴漏壶;拐进小巷喝一杯蛋咖啡创始店 Giang。",c:[21.0288,105.8489],q:"St Joseph Cathedral Hanoi",tags:["food"]},
-    {t:"15:30",n:"三十六行街 + 同春市场",d:"逛街买伴手礼(腰果、咖啡、斗笠),顺路回酒店取寄存行李。记得砍价。",c:[21.0380,105.8497],q:"Dong Xuan Market Hanoi",tags:[]},
-    {t:"16:30",n:"退房 · 前往内排机场",d:"Grab约45分钟,国内航班提前1.5h到即可。",c:[21.2140,105.8030],q:"Noi Bai International Airport Terminal 1",tags:[]},
-    {t:"19:00",n:"🎫 建议购买:河内 ✈ 岘港(傍晚班)",d:"HAN→DAD每天40+班,飞行1h25m。选18:00-20:00起飞的傍晚班(越航VN/越捷VJ/竹子QH),约¥200-400/人,到岘港约20:30,睡前落地、次日不赶早。越捷是廉航记得加购托运行李。",c:[16.0439,108.1994],f:[21.2140,105.8030],q:"Da Nang International Airport",tags:["flight","tip"]},
-    {t:"21:00",n:"岘港美溪入住 + 海边夜宵",d:"机场到美溪15分钟。放下行李简单吃点夜宵、海边散步,早点休息,明天玩山茶半岛。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["food"]},
+    {pr:"must",n:"昇龙皇城(世界遗产)",d:"李陈黎三朝皇城遗址,端门、敬天殿台基,地下还有越战D67作战指挥部。途经巴亭广场顺看。门票约3万盾。",c:[21.0353,105.8400],q:"Imperial Citadel of Thang Long Hanoi",tags:[]},
+    {pr:"must",n:"文庙(国子监)",d:"越南第一所大学,汉字牌匾满满中华文化痕迹。门票约7万盾。",c:[21.0293,105.8356],q:"Temple of Literature Hanoi",tags:[]},
+    {pr:"rec",n:"早餐:Pho Gia Truyen 牛肉粉",d:"49 Bat Dan街百年老店,河内最有名的Pho之一,排队快。",c:[21.0339,105.8464],q:"Pho Gia Truyen 49 Bat Dan Hanoi",tags:["food"]},
+    {pr:"rec",n:"午餐:Banh Mi 25",d:"老城区人气法棍店,推荐烤肉+pate口味。",c:[21.0355,105.8478],q:"Banh Mi 25 Hanoi",tags:["food"]},
+    {pr:"rec",n:"火炉监狱博物馆",d:"法殖民时期监狱+越战美军战俘营(参议员麦凯恩被关处),断头台、地牢实景,内容硬核但震撼。门票约5万盾。",c:[21.0256,105.8467],q:"Hoa Lo Prison Hanoi",tags:[]},
+    {pr:"rec",n:"河内大教堂 + Giang 蛋咖啡",d:"圣若瑟大教堂周边买咖啡豆、滴漏壶;拐进小巷喝一杯蛋咖啡创始店 Giang。",c:[21.0288,105.8489],q:"St Joseph Cathedral Hanoi",tags:["food"]},
+    {pr:"rec",n:"三十六行街 + 同春市场",d:"逛街买伴手礼(腰果、咖啡、斗笠),顺路回酒店取寄存行李。记得砍价。",c:[21.0380,105.8497],q:"Dong Xuan Market Hanoi",tags:[]},
+    {pr:"opt",n:"独柱寺",d:"巴亭广场旁,10分钟即可,顺路一看。",c:[21.0358,105.8337],q:"One Pillar Pagoda Hanoi",tags:[]},
+    {pr:"move",n:"退房 · 前往内排机场",d:"Grab约45分钟,国内航班提前1.5h到即可。",c:[21.2140,105.8030],q:"Noi Bai International Airport Terminal 1",tags:[]},
+    {pr:"move",n:"🎫 建议购买:河内 ✈ 岘港(傍晚班)",d:"HAN→DAD每天40+班,飞行1h25m。选18:00-20:00起飞的傍晚班(越航VN/越捷VJ/竹子QH),约¥200-400/人,到岘港约20:30,睡前落地、次日不赶早。越捷是廉航记得加购托运行李。",c:[16.0439,108.1994],f:[21.2140,105.8030],q:"Da Nang International Airport",tags:["flight","tip"]},
+    {pr:"move",n:"岘港美溪入住 + 海边夜宵",d:"机场到美溪15分钟。放下行李简单吃点夜宵、海边散步,早点休息,明天玩山茶半岛。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["food"]},
   ]},
 { tab:"7/30 岘港", title:"Day 3 · 7月30日 周四 · 岘港:山茶半岛 + 市区", note:"岘港第一整天,悠闲适应:早上租摩托,玩山茶半岛(灵应寺+千年榕树)、市区占婆博物馆,傍晚美溪海滩看日落,晚上龙桥夜景。",
   items:[
-    {t:"09:00",n:"租摩托车 · 出发",d:"自动挡12-15万盾/天,押护照或押金。⚠中国驾照在越南不被承认,务必戴头盔、买保险、慢骑;验车拍视频记录划痕。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["moto","tip"]},
-    {t:"10:00",n:"山茶半岛 · 灵应寺",d:"骑摩托上半岛,68米海上观音,俯瞰整个岘港湾。山路坡陡,慢骑。",c:[16.1004,108.2778],q:"Linh Ung Pagoda Son Tra",tags:["moto","nature"]},
-    {t:"11:00",n:"山茶半岛深处兜风(千年榕树)",d:"往半岛深处骑,千年榕树、Ban Co顶峰视野绝佳。⚠部分路段陡窄,车技一般到榕树折返。",c:[16.1130,108.3000],q:"Son Tra Banyan Tree",tags:["moto","nature"]},
-    {t:"12:30",n:"午餐:Bun Cha Ca 109 鱼饼米线",d:"岘港本地招牌,一碗约4万盾。",c:[16.0730,108.2200],q:"Bun Cha Ca 109 Da Nang",tags:["food"]},
-    {t:"14:00",n:"占婆雕刻博物馆 + 粉红教堂",d:"全球最全占婆石雕收藏,玄妙神像值得一看;隔壁粉色岘港大教堂顺手打卡。",c:[16.0605,108.2229],q:"Museum of Cham Sculpture Da Nang",tags:[]},
-    {t:"16:00",n:"美溪海滩游泳看日落",d:"福布斯六大最美海滩,水清浪缓。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["nature"]},
-    {t:"18:30",n:"晚餐:Be Man 海鲜大排档",d:"海鲜街人气店,现点现称:龙虾、蛏子、花蟹。点前确认价格。",c:[16.0666,108.2453],q:"Be Man Seafood Restaurant Da Nang",tags:["food"]},
-    {t:"20:00",n:"龙桥 + 韩江夜景",d:"沿江夜骑兜风。喷火表演只在周六日21:00,本周六(8/1)再来看。",c:[16.0614,108.2272],q:"Dragon Bridge Da Nang",tags:["nature"]},
+    {pr:"must",n:"山茶半岛 · 灵应寺",d:"骑摩托上半岛,68米海上观音,俯瞰整个岘港湾。山路坡陡,慢骑。",c:[16.1004,108.2778],q:"Linh Ung Pagoda Son Tra",tags:["moto","nature"]},
+    {pr:"must",n:"美溪海滩游泳看日落",d:"福布斯六大最美海滩,水清浪缓。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["nature"]},
+    {pr:"rec",n:"山茶半岛深处兜风(千年榕树)",d:"往半岛深处骑,千年榕树、Ban Co顶峰视野绝佳。⚠部分路段陡窄,车技一般到榕树折返。",c:[16.1130,108.3000],q:"Son Tra Banyan Tree",tags:["moto","nature"]},
+    {pr:"rec",n:"午餐:Bun Cha Ca 109 鱼饼米线",d:"岘港本地招牌,一碗约4万盾。",c:[16.0730,108.2200],q:"Bun Cha Ca 109 Da Nang",tags:["food"]},
+    {pr:"rec",n:"晚餐:Be Man 海鲜大排档",d:"海鲜街人气店,现点现称:龙虾、蛏子、花蟹。点前确认价格。",c:[16.0666,108.2453],q:"Be Man Seafood Restaurant Da Nang",tags:["food"]},
+    {pr:"rec",n:"龙桥 + 韩江夜景",d:"沿江夜骑兜风。喷火表演只在周六日21:00,本周六(8/1)再来看。",c:[16.0614,108.2272],q:"Dragon Bridge Da Nang",tags:["nature"]},
+    {pr:"opt",n:"占婆雕刻博物馆 + 粉红教堂",d:"全球最全占婆石雕收藏,玄妙神像值得一看;隔壁粉色岘港大教堂顺手打卡。",c:[16.0605,108.2229],q:"Museum of Cham Sculpture Da Nang",tags:[]},
+    {pr:"move",n:"租摩托车 · 出发",d:"自动挡12-15万盾/天,押护照或押金。⚠中国驾照在越南不被承认,务必戴头盔、买保险、慢骑;验车拍视频记录划痕。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["moto","tip"]},
   ]},
 { tab:"7/31 海云关", title:"Day 4 · 7月31日 周五 · 海云关摩托环线(全天)", note:"岘港摩托精华日!全程约90km:岘港→海云关→岚姑→原路返回。加满油,带防晒和雨衣。",
   items:[
-    {t:"08:00",n:"出发 · 沿海岸线北上",d:"经南乌渔村方向上山,盘山公路景色渐入佳境。",c:[16.0972,108.1310],q:"Nam O Beach Da Nang",tags:["moto"]},
-    {t:"09:30",n:"海云关(Hai Van Pass)",d:"「天下第一雄关」,Top Gear评为全球最美公路之一。关顶有古城门遗址,山海相接。",c:[16.1997,108.1291],q:"Hai Van Pass",tags:["moto","nature"]},
-    {t:"11:00",n:"岚姑镇 · 泻湖海滩",d:"翻过垭口就是岚姑湾,渔村泻湖,水上餐厅吃生蚝和海鲜午餐,便宜量大。",c:[16.2276,108.0771],q:"Lang Co Beach",tags:["food","nature"]},
-    {t:"14:00",n:"返程 · 观景台停留拍照",d:"下午光线拍岘港湾全景最佳。骑累了路边椰子水休息。",c:[16.1660,108.1450],q:"Hai Van Pass viewpoint",tags:["moto","nature"]},
-    {t:"16:30",n:"回市区休息",d:"冲个澡,傍晚海滩散步。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:[]},
-    {t:"18:30",n:"晚餐:Mi Quang 1A 广南面",d:"广南面创始老店,姜黄宽面+虾+猪肉+米纸,岘港必吃。",c:[16.0713,108.2170],q:"Mi Quang 1A Da Nang",tags:["food"]},
-    {t:"20:00",n:"山茶夜市 Son Tra Night Market",d:"龙桥/爱情桥附近,烤海鲜、芒果糯米饭、木薯甜品,吃着逛。骑了一天也可改成越式按摩(30-50万盾/90分钟)。",c:[16.0665,108.2290],q:"Son Tra Night Market Da Nang",tags:["food"]},
+    {pr:"must",n:"海云关(Hai Van Pass)",d:"「天下第一雄关」,Top Gear评为全球最美公路之一。关顶有古城门遗址,山海相接。",c:[16.1997,108.1291],q:"Hai Van Pass",tags:["moto","nature"]},
+    {pr:"rec",n:"岚姑镇 · 泻湖海滩",d:"翻过垭口就是岚姑湾,渔村泻湖,水上餐厅吃生蚝和海鲜午餐,便宜量大。",c:[16.2276,108.0771],q:"Lang Co Beach",tags:["food","nature"]},
+    {pr:"rec",n:"回市区休息",d:"冲个澡,傍晚海滩散步。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:[]},
+    {pr:"rec",n:"晚餐:Mi Quang 1A 广南面",d:"广南面创始老店,姜黄宽面+虾+猪肉+米纸,岘港必吃。",c:[16.0713,108.2170],q:"Mi Quang 1A Da Nang",tags:["food"]},
+    {pr:"opt",n:"返程 · 观景台停留拍照",d:"下午光线拍岘港湾全景最佳。骑累了路边椰子水休息。",c:[16.1660,108.1450],q:"Hai Van Pass viewpoint",tags:["moto","nature"]},
+    {pr:"opt",n:"山茶夜市 Son Tra Night Market",d:"龙桥/爱情桥附近,烤海鲜、芒果糯米饭、木薯甜品,吃着逛。骑了一天也可改成越式按摩(30-50万盾/90分钟)。",c:[16.0665,108.2290],q:"Son Tra Night Market Da Nang",tags:["food"]},
+    {pr:"move",n:"出发 · 沿海岸线北上",d:"经南乌渔村方向上山,盘山公路景色渐入佳境。",c:[16.0972,108.1310],q:"Nam O Beach Da Nang",tags:["moto"]},
   ]},
 { tab:"8/1 巴拿山", title:"Day 5 · 8月1日 周六 · 巴拿山 + 龙桥喷火", note:"门票约95万盾(2026年国际游客价,含缆车+佛手桥+法国村+游乐园)。摩托约45分钟山脚,也可拼车。早出发避人流!",
   items:[
-    {t:"07:00",n:"出发去巴拿山(山脚缆车站)",d:"骑摩托或Grab约45分钟到山脚缆车站,停车场安全。",c:[15.9960,108.0090],q:"Sun World Ba Na Hills",tags:["moto"]},
-    {t:"08:30",n:"佛手桥(Golden Bridge)",d:"上山第一站直奔佛手桥,9点前人少出片。云海概率大。",c:[15.9949,107.9962],q:"Golden Bridge Ba Na Hills",tags:["nature"]},
-    {t:"10:30",n:"法国村 + 空中花园",d:"欧式城堡街区,教堂、广场,随手都是照片。",c:[15.9977,107.9877],q:"French Village Ba Na Hills",tags:[]},
-    {t:"12:30",n:"山顶自助午餐 + Fantasy Park",d:"室内游乐园含在门票里:过山车、跳楼机、5D影院随便玩。",c:[15.9970,107.9890],q:"Fantasy Park Ba Na Hills",tags:[]},
-    {t:"15:30",n:"缆车下山回岘港",d:"避开17点下山高峰。回程小心午后阵雨。",c:[15.9960,108.0090],q:"Sun World Ba Na Hills",tags:["moto"]},
-    {t:"18:30",n:"晚餐:Banh Xeo Ba Duong 越南煎饼",d:"巷子深处的传奇煎饼店,配烤肉串,自己卷米纸。",c:[16.0560,108.2170],q:"Banh Xeo Ba Duong Da Nang",tags:["food"]},
-    {t:"21:00",n:"龙桥喷火表演 🔥",d:"周六21:00准时喷火+喷水,提前20分钟到桥东侧占位,别站太近会被淋。",c:[16.0614,108.2272],q:"Dragon Bridge Da Nang",tags:["nature"]},
+    {pr:"must",n:"佛手桥(Golden Bridge)",d:"上山第一站直奔佛手桥,9点前人少出片。云海概率大。",c:[15.9949,107.9962],q:"Golden Bridge Ba Na Hills",tags:["nature"]},
+    {pr:"must",n:"龙桥喷火表演 🔥",d:"周六21:00准时喷火+喷水,提前20分钟到桥东侧占位,别站太近会被淋。",c:[16.0614,108.2272],q:"Dragon Bridge Da Nang",tags:["nature"]},
+    {pr:"rec",n:"法国村 + 空中花园",d:"欧式城堡街区,教堂、广场,随手都是照片。",c:[15.9977,107.9877],q:"French Village Ba Na Hills",tags:[]},
+    {pr:"rec",n:"晚餐:Banh Xeo Ba Duong 越南煎饼",d:"巷子深处的传奇煎饼店,配烤肉串,自己卷米纸。",c:[16.0560,108.2170],q:"Banh Xeo Ba Duong Da Nang",tags:["food"]},
+    {pr:"opt",n:"山顶自助午餐 + Fantasy Park",d:"室内游乐园含在门票里:过山车、跳楼机、5D影院随便玩。",c:[15.9970,107.9890],q:"Fantasy Park Ba Na Hills",tags:[]},
+    {pr:"move",n:"出发去巴拿山(山脚缆车站)",d:"骑摩托或Grab约45分钟到山脚缆车站,停车场安全。",c:[15.9960,108.0090],q:"Sun World Ba Na Hills",tags:["moto"]},
+    {pr:"move",n:"缆车下山回岘港",d:"避开17点下山高峰。回程小心午后阵雨。",c:[15.9960,108.0090],q:"Sun World Ba Na Hills",tags:["moto"]},
   ]},
 { tab:"8/2 会安", title:"Day 6 · 8月2日 周日 · 五行山 + 会安古镇", note:"不去美山,省掉约60km暴晒骑行,睡到自然醒:顺路先爬五行山,中午到会安,古城+安邦海滩玩到灯笼夜景再夜骑回。全程约60km,轻松。",
   items:[
-    {t:"09:30",n:"睡到自然醒 → 五行山(Marble Mountains)",d:"去会安顺路(离市区15分钟)。水山最值得:玄空洞天光一束、望江台,有电梯。门票+洞窟约5.5万盾,凉快好逛。",c:[16.0037,108.2631],q:"Marble Mountains Da Nang",tags:["moto","nature"]},
-    {t:"11:30",n:"骑行至会安 · 停车",d:"再骑约25分钟到会安,古城边找摩托停车场(约1-2万盾),古城内步行。",c:[15.8776,108.3290],q:"Hoi An Ancient Town",tags:["moto"]},
-    {t:"12:00",n:"午餐:Banh Mi Phuong",d:"被安东尼·波登带火的「越南最好吃法棍」,排队但很快。",c:[15.8790,108.3300],q:"Banh Mi Phuong Hoi An",tags:["food"]},
-    {t:"13:30",n:"会安古城漫步",d:"日本廊桥、福建会馆、进记古宅。联票12万盾含5个景点。慢慢逛。",c:[15.8771,108.3260],q:"Japanese Covered Bridge Hoi An",tags:[]},
-    {t:"15:30",n:"安邦海滩 An Bang",d:"会安旁最惬意的海滩,躺椅+海鲜棚屋,傍晚游个泳消暑,比美溪安静。",c:[15.9060,108.3380],q:"An Bang Beach Hoi An",tags:["nature"]},
-    {t:"17:00",n:"下午茶:White Rose 白玫瑰",d:"白玫瑰虾饺创始店 + Cao Lau高楼面,会安双绝。",c:[15.8830,108.3250],q:"White Rose Restaurant Hoi An",tags:["food"]},
-    {t:"18:30",n:"秋盆河放河灯 + 灯笼夜景",d:"天黑后整座古城点亮灯笼,坐小船放河灯(讲价,约10-15万盾/船)。",c:[15.8760,108.3270],q:"An Hoi Bridge Hoi An",tags:["nature"]},
-    {t:"21:00",n:"夜骑回岘港",d:"沿海路车少路直,约40分钟。骑慢点。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["moto"]},
+    {pr:"must",n:"会安古城漫步",d:"日本廊桥、福建会馆、进记古宅。联票12万盾含5个景点。慢慢逛。",c:[15.8771,108.3260],q:"Japanese Covered Bridge Hoi An",tags:[]},
+    {pr:"must",n:"秋盆河放河灯 + 灯笼夜景",d:"天黑后整座古城点亮灯笼,坐小船放河灯(讲价,约10-15万盾/船)。",c:[15.8760,108.3270],q:"An Hoi Bridge Hoi An",tags:["nature"]},
+    {pr:"rec",n:"睡到自然醒 → 五行山(Marble Mountains)",d:"去会安顺路(离市区15分钟)。水山最值得:玄空洞天光一束、望江台,有电梯。门票+洞窟约5.5万盾,凉快好逛。",c:[16.0037,108.2631],q:"Marble Mountains Da Nang",tags:["moto","nature"]},
+    {pr:"rec",n:"午餐:Banh Mi Phuong",d:"被安东尼·波登带火的「越南最好吃法棍」,排队但很快。",c:[15.8790,108.3300],q:"Banh Mi Phuong Hoi An",tags:["food"]},
+    {pr:"rec",n:"安邦海滩 An Bang",d:"会安旁最惬意的海滩,躺椅+海鲜棚屋,傍晚游个泳消暑,比美溪安静。",c:[15.9060,108.3380],q:"An Bang Beach Hoi An",tags:["nature"]},
+    {pr:"rec",n:"下午茶:White Rose 白玫瑰",d:"白玫瑰虾饺创始店 + Cao Lau高楼面,会安双绝。",c:[15.8830,108.3250],q:"White Rose Restaurant Hoi An",tags:["food"]},
+    {pr:"move",n:"骑行至会安 · 停车",d:"再骑约25分钟到会安,古城边找摩托停车场(约1-2万盾),古城内步行。",c:[15.8776,108.3290],q:"Hoi An Ancient Town",tags:["moto"]},
+    {pr:"move",n:"夜骑回岘港",d:"沿海路车少路直,约40分钟。骑慢点。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["moto"]},
   ]},
 { tab:"8/3 飞胡志明", title:"Day 7 · 8月3日 周一 · 岘港悠闲上午 + 傍晚飞胡志明", note:"航班傍晚:上午海边发呆、韩市场买手信,中午还摩托吃碗面,下午从容飞胡志明,落地当晚只逛夜市。",
   items:[
-    {t:"08:30",n:"美溪海滩 最后一泡",d:"离开前再在福布斯六大最美海滩游一次,或沙滩咖啡发呆。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["nature"]},
-    {t:"10:00",n:"韩市场 · 买手信",d:"当地市场买咖啡、腰果、鱼露;二楼小吃摊便宜。",c:[16.0682,108.2244],q:"Han Market Da Nang",tags:[]},
-    {t:"11:30",n:"午餐 + 还摩托",d:"Mi Quang 1A 广南面收尾,把摩托还了(验车退押金),收拾行李。",c:[16.0713,108.2170],q:"Mi Quang 1A Da Nang",tags:["food","moto"]},
-    {t:"14:00",n:"咖啡歇脚 · 打包",d:"找家岘港咖啡馆歇脚,整理行李,不慌不忙。",c:[16.0678,108.2208],q:"Da Nang cafe",tags:["food"]},
-    {t:"16:00",n:"前往岘港机场",d:"离市区仅15分钟,国内航班提前1.5h到。",c:[16.0439,108.1994],q:"Da Nang International Airport",tags:[]},
-    {t:"18:30",n:"🎫 建议购买:岘港 ✈ 胡志明(傍晚班)",d:"DAD→SGN班次密集,飞行1h20m。选17:00-19:00起飞的傍晚班(越航VN/越捷VJ/竹子QH),约¥200-400/人,约20:00抵新山一机场,Grab30分钟到第一郡。落地即休息,不赶早。",c:[10.8188,106.6520],f:[16.0439,108.1994],q:"Tan Son Nhat International Airport",tags:["flight","tip"]},
-    {t:"21:00",n:"入住第一郡 + 夜宵",d:"滨城市场周边街头小吃(生春卷、甘蔗虾、椰子冰淇淋),或范五老街感受夜生活,轻松收尾第一天。",c:[10.7725,106.6980],q:"Ben Thanh Street Food Market",tags:["food"]},
+    {pr:"must",n:"美溪海滩 最后一泡",d:"离开前再在福布斯六大最美海滩游一次,或沙滩咖啡发呆。",c:[16.0599,108.2479],q:"My Khe Beach Da Nang",tags:["nature"]},
+    {pr:"opt",n:"韩市场 · 买手信",d:"当地市场买咖啡、腰果、鱼露;二楼小吃摊便宜。",c:[16.0682,108.2244],q:"Han Market Da Nang",tags:[]},
+    {pr:"opt",n:"咖啡歇脚 · 打包",d:"找家岘港咖啡馆歇脚,整理行李,不慌不忙。",c:[16.0678,108.2208],q:"Da Nang cafe",tags:["food"]},
+    {pr:"move",n:"午餐 + 还摩托",d:"Mi Quang 1A 广南面收尾,把摩托还了(验车退押金),收拾行李。",c:[16.0713,108.2170],q:"Mi Quang 1A Da Nang",tags:["food","moto"]},
+    {pr:"move",n:"前往岘港机场",d:"离市区仅15分钟,国内航班提前1.5h到。",c:[16.0439,108.1994],q:"Da Nang International Airport",tags:[]},
+    {pr:"move",n:"🎫 建议购买:岘港 ✈ 胡志明(傍晚班)",d:"DAD→SGN班次密集,飞行1h20m。选17:00-19:00起飞的傍晚班(越航VN/越捷VJ/竹子QH),约¥200-400/人,约20:00抵新山一机场,Grab30分钟到第一郡。落地即休息,不赶早。",c:[10.8188,106.6520],f:[16.0439,108.1994],q:"Tan Son Nhat International Airport",tags:["flight","tip"]},
+    {pr:"move",n:"入住第一郡 + 夜宵",d:"滨城市场周边街头小吃(生春卷、甘蔗虾、椰子冰淇淋),或范五老街感受夜生活,轻松收尾第一天。",c:[10.7725,106.6980],q:"Ben Thanh Street Food Market",tags:["food"]},
   ]},
 { tab:"8/4 胡志明", title:"Day 8 · 8月4日 周二 · 胡志明第一郡", note:"睡到自然醒,慢慢逛第一郡法式风情:邮局、教堂、咖啡公寓、统一宫都在步行/短Grab圈内。市区用Grab,摩托别租(车流凶猛)。",
   items:[
-    {t:"08:30",n:"早餐:Com Tam Ba Ghien 碎米饭",d:"米其林必比登推荐,巨型烤猪排盖碎米饭。",c:[10.7946,106.6825],q:"Com Tam Ba Ghien Ho Chi Minh City",tags:["food"]},
-    {t:"10:00",n:"中央邮局 + 红教堂(外观)",d:"法式邮局内部可寄明信片;红教堂修缮中看外观,旁边书街逛逛。",c:[10.7798,106.6990],q:"Saigon Central Post Office",tags:[]},
-    {t:"11:30",n:"统一宫",d:"原南越总统府,1975年坦克撞开的大门就在这里。",c:[10.7772,106.6958],q:"Independence Palace Ho Chi Minh City",tags:[]},
-    {t:"13:00",n:"午餐:Secret Garden 顶楼家常菜",d:"老公寓顶楼花园餐厅,越南家常菜环境一流。",c:[10.7737,106.6942],q:"Secret Garden Restaurant Ho Chi Minh City",tags:["food"]},
-    {t:"15:00",n:"粉教堂(耶稣圣心堂)",d:"少女心粉色教堂,外观拍照打卡。",c:[10.7886,106.6906],q:"Tan Dinh Church",tags:[]},
-    {t:"17:00",n:"咖啡公寓(The Cafe Apartment)",d:"9层老公寓每户都是咖啡馆,挑一家看阮惠步行街日落。",c:[10.7743,106.7038],q:"The Cafe Apartment Ho Chi Minh City",tags:["food"]},
-    {t:"19:00",n:"晚餐:Pho Le 南派牛肉粉",d:"南越Pho代表,汤偏甜配豆芽九层塔,和河内对比着吃。",c:[10.7550,106.6660],q:"Pho Le Ho Chi Minh City",tags:["food"]},
+    {pr:"must",n:"中央邮局 + 红教堂(外观)",d:"法式邮局内部可寄明信片;红教堂修缮中看外观,旁边书街逛逛。",c:[10.7798,106.6990],q:"Saigon Central Post Office",tags:[]},
+    {pr:"rec",n:"早餐:Com Tam Ba Ghien 碎米饭",d:"米其林必比登推荐,巨型烤猪排盖碎米饭。",c:[10.7946,106.6825],q:"Com Tam Ba Ghien Ho Chi Minh City",tags:["food"]},
+    {pr:"rec",n:"统一宫",d:"原南越总统府,1975年坦克撞开的大门就在这里。",c:[10.7772,106.6958],q:"Independence Palace Ho Chi Minh City",tags:[]},
+    {pr:"rec",n:"午餐:Secret Garden 顶楼家常菜",d:"老公寓顶楼花园餐厅,越南家常菜环境一流。",c:[10.7737,106.6942],q:"Secret Garden Restaurant Ho Chi Minh City",tags:["food"]},
+    {pr:"rec",n:"粉教堂(耶稣圣心堂)",d:"少女心粉色教堂,外观拍照打卡。",c:[10.7886,106.6906],q:"Tan Dinh Church",tags:[]},
+    {pr:"rec",n:"咖啡公寓(The Cafe Apartment)",d:"9层老公寓每户都是咖啡馆,挑一家看阮惠步行街日落。",c:[10.7743,106.7038],q:"The Cafe Apartment Ho Chi Minh City",tags:["food"]},
+    {pr:"rec",n:"晚餐:Pho Le 南派牛肉粉",d:"南越Pho代表,汤偏甜配豆芽九层塔,和河内对比着吃。",c:[10.7550,106.6660],q:"Pho Le Ho Chi Minh City",tags:["food"]},
   ]},
 { tab:"8/5 湄公河", title:"Day 9 · 8月5日 周三 · 湄公河三角洲一日游", note:"建议提前在Klook/KKday订美托+槟椥一日团(约150-250元/人,含往返车+船+午餐),市区7:30接。自然风光重头戏。",
   items:[
-    {t:"07:30",n:"出发前往美托(My Tho)",d:"车程约1.5-2小时,途经湄公河平原稻田。",c:[10.3600,106.3600],q:"My Tho Vietnam",tags:["nature"]},
-    {t:"09:30",n:"永长寺 + 游船四岛",d:"乘船游龙、凤、龟、麟四岛,看水上人家。",c:[10.3648,106.3800],q:"Vinh Trang Pagoda My Tho",tags:["nature"]},
-    {t:"11:00",n:"槟椥椰子糖作坊 + 蜂蜜茶",d:"看椰子糖制作,尝蜂蜜柚子茶、热带水果配民歌表演。",c:[10.2415,106.3750],q:"Ben Tre Vietnam",tags:["food","nature"]},
-    {t:"13:00",n:"水椰林手划小舟",d:"戴斗笠坐小木船穿越水椰林窄道,湄公河名场面。",c:[10.3330,106.3260],q:"Thoi Son Island My Tho",tags:["nature"]},
-    {t:"14:30",n:"象耳鱼午餐 + 返程",d:"炸象耳鱼卷米纸是特色。约17:30回到市区。",c:[10.3600,106.3600],q:"My Tho Vietnam",tags:["food"]},
-    {t:"19:00",n:"晚餐:Ốc Đào 螺贝大排档",d:"西贡宵夜文化,几十种螺贝辣炒,配西贡啤酒。",c:[10.7659,106.6885],q:"Oc Dao Ho Chi Minh City",tags:["food"]},
-    {t:"21:00",n:"Landmark 81 / 西贡河畔(可选)",d:"越南第一高楼,81层观景台或楼下江边吹风。",c:[10.7951,106.7220],q:"Landmark 81 Ho Chi Minh City",tags:[]},
+    {pr:"must",n:"水椰林手划小舟",d:"戴斗笠坐小木船穿越水椰林窄道,湄公河名场面。",c:[10.3330,106.3260],q:"Thoi Son Island My Tho",tags:["nature"]},
+    {pr:"rec",n:"永长寺 + 游船四岛",d:"乘船游龙、凤、龟、麟四岛,看水上人家。",c:[10.3648,106.3800],q:"Vinh Trang Pagoda My Tho",tags:["nature"]},
+    {pr:"rec",n:"槟椥椰子糖作坊 + 蜂蜜茶",d:"看椰子糖制作,尝蜂蜜柚子茶、热带水果配民歌表演。",c:[10.2415,106.3750],q:"Ben Tre Vietnam",tags:["food","nature"]},
+    {pr:"rec",n:"晚餐:Ốc Đào 螺贝大排档",d:"西贡宵夜文化,几十种螺贝辣炒,配西贡啤酒。",c:[10.7659,106.6885],q:"Oc Dao Ho Chi Minh City",tags:["food"]},
+    {pr:"opt",n:"象耳鱼午餐 + 返程",d:"炸象耳鱼卷米纸是特色。约17:30回到市区。",c:[10.3600,106.3600],q:"My Tho Vietnam",tags:["food"]},
+    {pr:"opt",n:"Landmark 81 / 西贡河畔(可选)",d:"越南第一高楼,81层观景台或楼下江边吹风。",c:[10.7951,106.7220],q:"Landmark 81 Ho Chi Minh City",tags:[]},
+    {pr:"move",n:"出发前往美托(My Tho)",d:"车程约1.5-2小时,途经湄公河平原稻田。",c:[10.3600,106.3600],q:"My Tho Vietnam",tags:["nature"]},
   ]},
 { tab:"8/6 回杭州", title:"Day 10 · 8月6日 周四 · 采购收尾 + 傍晚飞杭州", note:"最后一天不赶,睡饱再动:上午战争博物馆、买伴手礼,傍晚从容飞回杭州(回程机票也建议订傍晚班)。",
   items:[
-    {t:"08:30",n:"早餐:Banh Mi Huynh Hoa",d:"「西贡第一法棍」,料多到合不上,趁早去避排队。",c:[10.7688,106.6903],q:"Banh Mi Huynh Hoa",tags:["food"]},
-    {t:"10:00",n:"战争遗迹博物馆",d:"了解越战历史,内容沉重但值得。门票4万盾。",c:[10.7794,106.6926],q:"War Remnants Museum",tags:[]},
-    {t:"12:00",n:"午餐 + 采购伴手礼",d:"滨城市场/超市扫货:中原G7咖啡、腰果、椰子糖、鱼露、奥黛冰箱贴。",c:[10.7725,106.6980],q:"Ben Thanh Market",tags:["food"]},
-    {t:"15:00",n:"咖啡歇脚 · 打包",d:"找家西贡老咖啡馆歇脚,整理行李。",c:[10.7770,106.7000],q:"Ho Chi Minh City District 1",tags:[]},
-    {t:"17:00",n:"🎫 前往新山一机场 · 傍晚飞杭州",d:"回程目的地杭州(SGN→HGH):直飞航班较少,多为经厦门/南宁/广州等中转,总程约6-9h;机票待订,建议订傍晚/晚班。Grab到机场30分钟,国际航班提前3h。",c:[10.8188,106.6520],q:"Tan Son Nhat International Airport",tags:["flight","tip"]},
+    {pr:"must",n:"战争遗迹博物馆",d:"了解越战历史,内容沉重但值得。门票4万盾。",c:[10.7794,106.6926],q:"War Remnants Museum",tags:[]},
+    {pr:"rec",n:"早餐:Banh Mi Huynh Hoa",d:"「西贡第一法棍」,料多到合不上,趁早去避排队。",c:[10.7688,106.6903],q:"Banh Mi Huynh Hoa",tags:["food"]},
+    {pr:"rec",n:"午餐 + 采购伴手礼",d:"滨城市场/超市扫货:中原G7咖啡、腰果、椰子糖、鱼露、奥黛冰箱贴。",c:[10.7725,106.6980],q:"Ben Thanh Market",tags:["food"]},
+    {pr:"opt",n:"咖啡歇脚 · 打包",d:"找家西贡老咖啡馆歇脚,整理行李。",c:[10.7770,106.7000],q:"Ho Chi Minh City District 1",tags:[]},
+    {pr:"move",n:"🎫 前往新山一机场 · 傍晚飞杭州",d:"回程目的地杭州(SGN→HGH):直飞航班较少,多为经厦门/南宁/广州等中转,总程约6-9h;机票待订,建议订傍晚/晚班。Grab到机场30分钟,国际航班提前3h。",c:[10.8188,106.6520],q:"Tan Son Nhat International Airport",tags:["flight","tip"]},
   ]},
-{ tab:"📌 贴士", title:"实用信息", note:"", tips:true, items:[]},
+{ tab:"📌 贴士", title:"实用信息", note:"", tips:true, items:[]}
 ];
 
 const TIPS_HTML = `
@@ -221,6 +226,7 @@ const tabsEl = document.getElementById('tabs');
 const labelEl = document.getElementById('mapLabel');
 const routeBtn = document.getElementById('routeBtn');
 const TAG_LABEL = {food:'🍜 美食', nature:'🏞 风光', moto:'🛵 摩托', flight:'✈ 航班', tip:'⚠ 注意'};
+const PR_LABEL = {must:'⭐ 必去', rec:'推荐', opt:'可选', move:'🚕 交通/固定'};
 
 function extUrl(q){ return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q); }
 function osmUrl(c){ return 'https://www.openstreetmap.org/?mlat=' + c[0] + '&mlon=' + c[1] + '#map=17/' + c[0] + '/' + c[1]; }
@@ -259,21 +265,14 @@ function drawDay(di, selectIdx){
     groups[key].items.push(it);
   });
 
-  // 顺序连线(虚线)
   const line = day.items.map(it => it.c);
-  L.polyline(line, {color:'#0e7c7b', weight:3, opacity:.55, dashArray:'6 8'}).addTo(dayLayer);
-
-  // 高亮当前这一段(上一站 → 当前站)
-  if (selectIdx !== undefined && selectIdx > 0){
-    L.polyline([day.items[selectIdx-1].c, day.items[selectIdx].c], {color:'#e74c3c', weight:5, opacity:.9}).addTo(dayLayer);
-  }
 
   // 标记
   order.forEach(key => {
     const g = groups[key];
     const label = g.nums.join('·');
     const selected = selectIdx !== undefined && g.nums.includes(selectIdx+1);
-    const popup = g.items.map(it => '<b>' + it.t + '</b> ' + it.n).join('<br>')
+    const popup = g.items.map(it => it.n).join('<br>')
       + '<br><a href="' + osmUrl(g.c) + '" target="_blank">OpenStreetMap ↗</a>'
       + ' · <a href="' + extUrl(g.items[0].q) + '" target="_blank">Google导航 ↗</a>';
     const m = L.marker(g.c, {icon: pinIcon(label, selected)}).bindPopup(popup).addTo(dayLayer);
@@ -317,7 +316,7 @@ DAYS.forEach((day, di) => {
       el.className = 'item';
       el.id = 'item-' + di + '-' + ii;
       let badges = (it.tags||[]).map(t => '<span class="badge ' + t + '">' + TAG_LABEL[t] + '</span>').join('');
-      el.innerHTML = '<div class="time">' + it.t + '</div>'
+      el.innerHTML = '<div class="prbadge ' + it.pr + '">' + (PR_LABEL[it.pr]||'') + '</div>'
         + '<div class="name"><span class="num">' + (ii+1) + '</span>' + it.n + '</div>'
         + '<div class="desc">' + it.d + '</div>'
         + (badges ? '<div class="badges">' + badges + '</div>' : '')
@@ -339,7 +338,7 @@ function showDay(di){
   const day = DAYS[di];
   if (day.items.length){
     drawDay(di);
-    labelEl.textContent = day.tab + ' · 全天 ' + day.items.length + ' 站';
+    labelEl.textContent = day.tab + ' · 共 ' + day.items.length + ' 个候选';
     routeBtn.style.display = 'none';
   } else {
     dayLayer.clearLayers();
@@ -357,15 +356,12 @@ function selectItem(di, ii){
   drawDay(di, ii);                       // 保留全天标记,当前项高亮为大号绿色
   if (it.f){
     map.fitBounds(L.latLngBounds([it.f, it.c]).pad(0.2));           // 航班:显示整条航线
-  } else if (ii > 0){
-    const prev = DAYS[di].items[ii-1];   // 视图同时框住上一站和当前站
-    map.fitBounds(L.latLngBounds([prev.c, it.c]).pad(0.35), {maxZoom:16, animate:true});
   } else {
     map.setView(it.c, 16, {animate:true});
   }
   const m = markerByIdx[ii];
   if (m) m.openPopup();
-  labelEl.textContent = (ii > 0 && !it.f ? '↳ ' : '') + it.t + ' · ' + it.n;
+  labelEl.textContent = it.n;
   routeBtn.style.display = 'block';
 }
 
