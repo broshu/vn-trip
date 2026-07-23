@@ -254,7 +254,12 @@ function drawDay(di, selectIdx){
 
   // 顺序连线(虚线)
   const line = day.items.map(it => it.c);
-  L.polyline(line, {color:'#0e7c7b', weight:3, opacity:.65, dashArray:'6 8'}).addTo(dayLayer);
+  L.polyline(line, {color:'#0e7c7b', weight:3, opacity:.55, dashArray:'6 8'}).addTo(dayLayer);
+
+  // 高亮当前这一段(上一站 → 当前站)
+  if (selectIdx !== undefined && selectIdx > 0){
+    L.polyline([day.items[selectIdx-1].c, day.items[selectIdx].c], {color:'#e74c3c', weight:5, opacity:.9}).addTo(dayLayer);
+  }
 
   // 标记
   order.forEach(key => {
@@ -343,11 +348,17 @@ function selectItem(di, ii){
   if (el){ el.classList.add('active'); el.scrollIntoView({block:'nearest', behavior:'smooth'}); }
   const it = DAYS[di].items[ii];
   drawDay(di, ii);                       // 保留全天标记,当前项高亮为大号绿色
-  if (it.f) map.fitBounds(L.latLngBounds([it.f, it.c]).pad(0.2));   // 航班:显示整条航线
-  else map.setView(it.c, 16, {animate:true});
+  if (it.f){
+    map.fitBounds(L.latLngBounds([it.f, it.c]).pad(0.2));           // 航班:显示整条航线
+  } else if (ii > 0){
+    const prev = DAYS[di].items[ii-1];   // 视图同时框住上一站和当前站
+    map.fitBounds(L.latLngBounds([prev.c, it.c]).pad(0.35), {maxZoom:16, animate:true});
+  } else {
+    map.setView(it.c, 16, {animate:true});
+  }
   const m = markerByIdx[ii];
   if (m) m.openPopup();
-  labelEl.textContent = it.t + ' · ' + it.n;
+  labelEl.textContent = (ii > 0 && !it.f ? '↳ ' : '') + it.t + ' · ' + it.n;
   routeBtn.style.display = 'block';
 }
 
