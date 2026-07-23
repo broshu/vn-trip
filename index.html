@@ -60,6 +60,10 @@
   .map-label { position:absolute; top:12px; left:50%; transform:translateX(-50%); z-index:1000; background:#fff; padding:7px 16px; border-radius:20px; box-shadow:0 2px 10px rgba(0,0,0,.18); font-size:13px; font-weight:600; color:#2b3a42; max-width:60%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .route-btn { position:absolute; top:12px; right:12px; z-index:1000; background:#0e7c7b; color:#fff; padding:7px 14px; border-radius:20px; box-shadow:0 2px 10px rgba(0,0,0,.18); font-size:12.5px; font-weight:600; cursor:pointer; user-select:none; }
   .route-btn:hover { background:#12a5a0; }
+  .city-ov { position:absolute; top:12px; left:12px; z-index:1000; background:#fff; border-radius:20px; box-shadow:0 2px 10px rgba(0,0,0,.18); padding:5px 9px; font-size:12px; display:flex; gap:4px; align-items:center; flex-wrap:wrap; max-width:60%; }
+  .city-ov b { color:#0e7c7b; font-weight:700; }
+  .city-ov span { cursor:pointer; padding:2px 9px; border-radius:12px; background:#e5f4f3; color:#0e7c7b; font-weight:600; user-select:none; }
+  .city-ov span:hover { background:#12a5a0; color:#fff; }
 
   /* Leaflet 数字标记 */
   .pin { width:26px; height:26px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); background:#e74c3c; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; }
@@ -90,6 +94,7 @@
   <div class="map-pane">
     <div class="map-label" id="mapLabel">越南全境总览</div>
     <div class="route-btn" id="routeBtn" style="display:none">🗺 显示当天全部地点</div>
+    <div class="city-ov" id="cityOv"><b>城市全景:</b><span data-c="hanoi">河内</span><span data-c="danang">岘港</span><span data-c="hcmc">胡志明</span></div>
     <div id="map"></div>
   </div>
 </div>
@@ -275,7 +280,7 @@ function drawDay(di, selectIdx){
     const popup = g.items.map(it => it.n).join('<br>')
       + '<br><a href="' + osmUrl(g.c) + '" target="_blank">OpenStreetMap ↗</a>'
       + ' · <a href="' + extUrl(g.items[0].q) + '" target="_blank">Google导航 ↗</a>';
-    const m = L.marker(g.c, {icon: pinIcon(label, selected)}).bindPopup(popup).addTo(dayLayer);
+    const m = L.marker(g.c, {icon: pinIcon(label, selected)}).bindPopup(popup, {autoPan:false}).addTo(dayLayer);
     g.nums.forEach(n => markerByIdx[n-1] = m);
   });
 
@@ -366,6 +371,36 @@ function selectItem(di, ii){
 }
 
 routeBtn.onclick = () => showDay(currentDay);
+
+// ---- 城市全景:显示某城全部景点 ----
+const CITY = {
+  hanoi:  {name:'河内', box:[20.9, 21.3, 105.6, 106.0]},
+  danang: {name:'岘港(含会安)', box:[15.4, 16.45, 107.8, 108.65]},
+  hcmc:   {name:'胡志明(含湄公河)', box:[10.2, 11.05, 106.3, 107.2]},
+};
+function showCity(key){
+  const cfg = CITY[key];
+  dayLayer.clearLayers();
+  document.querySelectorAll('.item').forEach(e=>e.classList.remove('active'));
+  const seen = {}, pts = [];
+  DAYS.forEach(day => (day.items||[]).forEach(it => {
+    if (it.pr === 'move') return;                    // 跳过交通/固定
+    const la = it.c[0], lo = it.c[1], b = cfg.box;
+    if (la<b[0]||la>b[1]||lo<b[2]||lo>b[3]) return;
+    const k = la.toFixed(4)+','+lo.toFixed(4);
+    if (seen[k]) return; seen[k]=1; pts.push(it);
+  }));
+  pts.forEach((it,i) => {
+    const popup = it.n
+      + '<br><a href="'+extUrl(it.q)+'" target="_blank">Google导航 ↗</a>'
+      + ' · <a href="'+osmUrl(it.c)+'" target="_blank">OSM ↗</a>';
+    L.marker(it.c, {icon: pinIcon(i+1, false)}).bindPopup(popup, {autoPan:false}).addTo(dayLayer);
+  });
+  if (pts.length) map.fitBounds(L.latLngBounds(pts.map(p=>p.c)).pad(0.12));
+  labelEl.textContent = cfg.name + ' · 全部地点 ' + pts.length + ' 个';
+  routeBtn.style.display = 'none';
+}
+document.querySelectorAll('#cityOv span').forEach(s => s.onclick = () => showCity(s.dataset.c));
 
 // 默认显示 Day1 全天
 showDay(1);
